@@ -1,0 +1,8 @@
+{
+	"name": "backend",
+	"private": true,
+	"scripts": {
+		"dev": "make dev",
+		"build": "make build"
+	}
+}
