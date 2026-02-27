@@ -16,6 +16,7 @@ type paymentRepo struct {
 	data []domain.Payment
 }
 
+// static
 func NewPaymentRepository() PaymentRepository {
 	return &paymentRepo{
 		data: []domain.Payment{

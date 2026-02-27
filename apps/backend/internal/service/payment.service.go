@@ -1,46 +1,63 @@
 package service
 
 import (
-	"backend/internal/domain"
-	"backend/internal/repository"
+	"context"
+	"encoding/json"
 	"errors"
+	"time"
+
+	"backend/internal/domain"
+	"backend/internal/lib"
+	"backend/internal/repository"
+
+	"github.com/redis/go-redis/v9"
 )
 
-type PaymentService interface {
-	GetAll() ([]domain.Payment, map[string]int, error)
-	GetPaymentsByStatus(status string) ([]domain.Payment, error)
+// business prccess
+type PaymentService struct {
+	repo  repository.PaymentRepository
+	redis *redis.Client
 }
 
-type paymentService struct {
-	repo repository.PaymentRepository
-}
-
-func NewPaymentService(r repository.PaymentRepository) PaymentService {
-	return &paymentService{r}
-}
-
-func (s *paymentService) GetAll() ([]domain.Payment, map[string]int, error) {
-	data, _ := s.repo.FindAll()
-
-	summary := map[string]int{
-		"total":   len(data),
-		"success": 0,
-		"failed":  0,
+func NewPaymentService(repo repository.PaymentRepository, redis *redis.Client) *PaymentService {
+	return &PaymentService{
+		repo:  repo,
+		redis: redis,
 	}
+}
 
-	for _, p := range data {
-		if p.Status == "success" {
-			summary["success"]++
-		}
-		if p.Status == "failed" {
-			summary["failed"]++
+func (s *PaymentService) GetAll() ([]domain.Payment, map[string]int, error) {
+
+	ctx := context.Background()
+	cacheKey := "payments:all"
+
+	// 1 Try Redis
+	val, err := s.redis.Get(ctx, cacheKey).Result()
+	if err == nil {
+		var cached []domain.Payment
+		if err := json.Unmarshal([]byte(val), &cached); err == nil {
+			summary := lib.CalculateSummary(cached)
+			return cached, summary, nil
 		}
 	}
 
-	return data, summary, nil
+	// 2️ Fallback DB
+	payments, err := s.repo.FindAll()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// 3️ Calculate summary
+	summary := lib.CalculateSummary(payments)
+
+	// 4️ Save to Redis
+	bytes, _ := json.Marshal(payments)
+	_ = s.redis.Set(ctx, cacheKey, bytes, 5*time.Minute).Err()
+
+	return payments, summary, nil
 }
 
-func (s *paymentService) GetPaymentsByStatus(status string) ([]domain.Payment, error) {
+func (s *PaymentService) GetPaymentsByStatus(status string) ([]domain.Payment, error) {
 
 	switch domain.PaymentStatus(status) {
 	case domain.StatusCompleted,

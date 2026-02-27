@@ -11,6 +11,8 @@ import (
 	"backend/internal/service"
 
 	"github.com/gin-gonic/gin"
+
+	"backend/internal/infrastructure"
 )
 
 
@@ -30,14 +32,16 @@ func main() {
 	r.StaticFile("/openapi.yaml", "./openapi.yaml")
 
 	v1 := r.Group("/dashboard/v1")
-
+	
+	// Redis
+	redisClient := infrastructure.NewRedisClient()
 	// ===== Repository Layer =====
 	userRepo := repository.NewUserRepository()
 	paymentRepo := repository.NewPaymentRepository()
 
 	// ===== Service Layer =====
 	authService := service.NewAuthService(userRepo)
-	paymentService := service.NewPaymentService(paymentRepo)
+	paymentService := service.NewPaymentService(paymentRepo, redisClient.Client)
 
 	// ===== Handler Layer =====
 	authHandler := handler.NewAuthHandler(authService)
