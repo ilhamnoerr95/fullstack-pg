@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,8 +24,16 @@ func handlerTest(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+		// Redis
+	redisClient := infrastructure.NewRedisClient()
+	
 	log.Println("Backend running on :8080")
-
+	pong, err := redisClient.Client.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatal("Redis not connected:", err)
+	}
+	log.Println("Redis connected:", pong)
+	
 	r := gin.Default()
 
 	// Serve Swagger UI and OpenAPI spec
@@ -33,8 +42,7 @@ func main() {
 
 	v1 := r.Group("/dashboard/v1")
 	
-	// Redis
-	redisClient := infrastructure.NewRedisClient()
+
 	// ===== Repository Layer =====
 	userRepo := repository.NewUserRepository()
 	paymentRepo := repository.NewPaymentRepository()
