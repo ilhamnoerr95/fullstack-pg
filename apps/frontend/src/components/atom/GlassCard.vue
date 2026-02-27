@@ -15,6 +15,8 @@ defineProps<{
 
 <style scoped>
 .glass-card {
+	position: relative;
+
 	/* Glass background */
 	background: rgba(255, 255, 255, 0.15);
 	backdrop-filter: blur(14px);

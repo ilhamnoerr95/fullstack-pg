@@ -9,10 +9,12 @@ import LoginForm from "../../components/molecules/LoginForm.vue";
 </template>
 
 <style scoped>
-/* .login-page {
-	min-height: 100vh;
-	display: grid;
-	place-items: center;
-	background: #f4f6fb;
-} */
+.login-page {
+	height: 90vh;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+	min-width: 320px;
+}
 </style>

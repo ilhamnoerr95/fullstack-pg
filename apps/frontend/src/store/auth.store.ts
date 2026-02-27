@@ -4,6 +4,7 @@ interface User {
 	id: number;
 	email: string;
 	password: string;
+	role?: "admin" | "user";
 }
 
 export const useAuthStore = defineStore("auth", {
@@ -13,6 +14,7 @@ export const useAuthStore = defineStore("auth", {
 	}),
 	getters: {
 		isAuthenticated: (state) => !!state.token,
+		role: (state) => state.user?.role || null,
 	},
 	actions: {
 		login(token: string, user: User) {

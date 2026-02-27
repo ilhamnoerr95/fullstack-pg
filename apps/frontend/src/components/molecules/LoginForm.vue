@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../../store/auth.store";
+import { message } from "ant-design-vue";
 
 import BaseInput from "../atom/BaseInput.vue";
 import GlassCard from "../atom/GlassCard.vue";
@@ -19,6 +20,12 @@ const submit = async () => {
 	loading.value = true;
 
 	try {
+		const data = {
+			id: Date.now(),
+			email: email.value,
+			password: password.value,
+		};
+
 		// fake API delay
 		await new Promise((r) => setTimeout(r, 800));
 
@@ -26,12 +33,8 @@ const submit = async () => {
 			throw new Error("Email dan password wajib diisi");
 		}
 
-		auth.login("fake-token", {
-			id: 1,
-			name: "Ilham",
-			email: email.value,
-		});
-
+		auth.login("fake-token", data);
+		message.success("Logged in successfully");
 		router.push("/dashboard");
 	} catch (e: any) {
 		error.value = e.message;
@@ -42,8 +45,8 @@ const submit = async () => {
 </script>
 
 <template>
-	<form @submit.prevent="submit">
-		<GlassCard>
+	<GlassCard>
+		<form @submit.prevent="submit">
 			<h2>Login to dashboard</h2>
 
 			<BaseInput
@@ -59,18 +62,20 @@ const submit = async () => {
 				placeholder="••••••••"
 			/>
 
-			<p
-				v-if="error"
-				class="form-error"
-			>
-				{{ error }}
-			</p>
+			<div class="wrapper-error">
+				<p
+					v-if="error"
+					class="form-error"
+				>
+					{{ error }}
+				</p>
+			</div>
 
 			<button :disabled="loading">
 				{{ loading ? "Logging in..." : "Login" }}
 			</button>
-		</GlassCard>
-	</form>
+		</form>
+	</GlassCard>
 </template>
 
 <style scoped>
@@ -97,6 +102,11 @@ button:hover:not(:disabled) {
 button:disabled {
 	opacity: 0.6;
 	cursor: not-allowed;
+}
+
+.wrapper-error {
+	min-height: 1.5rem;
+	margin-bottom: 1rem;
 }
 
 .form-error {
