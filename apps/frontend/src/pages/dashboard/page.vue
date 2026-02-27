@@ -48,15 +48,24 @@ const columns: TableColumnsType<IPayment> = [
 		title: "Status",
 		dataIndex: "status",
 		key: "status",
+		filters: [
+			{ text: "Success", value: "success" },
+			{ text: "Failed", value: "failed" },
+		],
+		onFilter: (value, record) => record.status === value,
 	},
 ];
 
-async function fetchPayments() {
+async function fetchPayments(status = "") {
 	try {
 		loading.value = true;
 		const token = (localStorage.getItem("token") as string) || "";
 
-		const response = await api.get<IResponsePayments>("/payments", "v1", token);
+		const response = await api.get<IResponsePayments>(
+			"/payments" + (status ? `?status=${status}` : ""),
+			"v1",
+			token,
+		);
 
 		payments.value = response.payments;
 		summary.value = response.summary;
@@ -66,7 +75,11 @@ async function fetchPayments() {
 		loading.value = false;
 	}
 }
+const handleTableChange = (pagination: any, filters: any, sorter: any) => {
+	const selectedStatus = filters.status?.[0] || "";
 
+	fetchPayments(selectedStatus);
+};
 onMounted(fetchPayments);
 </script>
 
@@ -86,6 +99,7 @@ onMounted(fetchPayments);
 				:loading="loading"
 				rowKey="id"
 				bordered
+				@change="handleTableChange"
 			>
 				<template #bodyCell="{ column, text }">
 					<span v-if="column.dataIndex === 'date'">
