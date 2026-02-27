@@ -3,10 +3,12 @@ package service
 import (
 	"backend/internal/domain"
 	"backend/internal/repository"
+	"errors"
 )
 
 type PaymentService interface {
 	GetAll() ([]domain.Payment, map[string]int, error)
+	GetPaymentsByStatus(status string) ([]domain.Payment, error)
 }
 
 type paymentService struct {
@@ -36,4 +38,17 @@ func (s *paymentService) GetAll() ([]domain.Payment, map[string]int, error) {
 	}
 
 	return data, summary, nil
+}
+
+func (s *paymentService) GetPaymentsByStatus(status string) ([]domain.Payment, error) {
+
+	switch domain.PaymentStatus(status) {
+	case domain.StatusCompleted,
+		domain.StatusProcessing,
+		domain.StatusFailed:
+	default:
+		return nil, errors.New("invalid payment status")
+	}
+
+	return s.repo.FindByStatus(domain.PaymentStatus(status))
 }

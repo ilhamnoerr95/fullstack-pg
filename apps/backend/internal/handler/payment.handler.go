@@ -16,10 +16,29 @@ func NewPaymentHandler(s service.PaymentService) *PaymentHandler {
 
 
 func (h *PaymentHandler) GetAll(c *gin.Context) {
-	data, summary, _ := h.service.GetAll()
+
+	status := c.Query("status")
+
+	if status != "" {
+		data, err := h.service.GetPaymentsByStatus(status)
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(200, gin.H{"payments": data})
+		return
+	}
+
+	data, summary, err := h.service.GetAll()
+	if err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(200, gin.H{
 		"payments": data,
 		"summary":  summary,
 	})
 }
+

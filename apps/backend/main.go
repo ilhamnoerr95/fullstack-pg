@@ -23,12 +23,6 @@ func handlerTest(w http.ResponseWriter, r *http.Request) {
 func main() {
 	log.Println("Backend running on :8080")
 
-	
-	// // HTTP HANDLER
-	// http.HandleFunc("/test", handlerTest)
-	
-	// // listen and serve
-	// http.ListenAndServe(":8080", nil)
 	r := gin.Default()
 
 	// Serve Swagger UI and OpenAPI spec
@@ -55,7 +49,10 @@ func main() {
 
 	api := v1.Group("/payments")
 	api.Use(middleware.AuthMiddleware())
-	api.GET("", paymentHandler.GetAll)
+	{
+		api.GET("", paymentHandler.GetAll)
+
+	}
 
 	r.Run(":8080")
 }
