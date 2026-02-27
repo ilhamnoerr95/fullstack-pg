@@ -18,9 +18,15 @@ func NewUserRepository() UserRepository {
 		users: []domain.User{
 			{
 				ID:       "1",
-				Email:    "admin@mail.com",
+				Email:    "operator@mail.com",
 				Password: "123456",
 				Role:     "operator",
+			},
+			{
+				ID:       "2",
+				Email:    "cs@mail.com",
+				Password: "123456",
+				Role:     "cs",
 			},
 		},
 	}

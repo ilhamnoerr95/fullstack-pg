@@ -22,12 +22,19 @@ func handlerTest(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	log.Println("Backend running on :8080")
+
+	
 	// // HTTP HANDLER
 	// http.HandleFunc("/test", handlerTest)
 	
 	// // listen and serve
 	// http.ListenAndServe(":8080", nil)
 	r := gin.Default()
+
+	// Serve Swagger UI and OpenAPI spec
+	r.StaticFile("/docs", "./docs/swagger.html")
+	r.StaticFile("/openapi.yaml", "./openapi.yaml")
+
 	v1 := r.Group("/dashboard/v1")
 
 	// ===== Repository Layer =====

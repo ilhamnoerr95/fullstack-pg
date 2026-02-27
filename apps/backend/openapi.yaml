@@ -1,0 +1,95 @@
+openapi: 3.0.3
+
+info:
+  title: Dashboard API
+  version: 1.0.0
+  description: Payment Dashboard API
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /dashboard/v1/auth/login:
+    post:
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  role:
+                    type: string
+
+  /dashboard/v1/payments:
+    get:
+      summary: Get all payments
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List payments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Payment"
+                  summary:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      success:
+                        type: integer
+                      failed:
+                        type: integer
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        merchant_name:
+          type: string
+        date:
+          type: string
+          format: date-time
+        amount:
+          type: number
+        status:
+          type: string
+          enum: [success, failed]
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

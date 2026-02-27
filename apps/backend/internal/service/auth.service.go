@@ -23,6 +23,7 @@ func (s *authService) Login(email, password string) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	
 
 	if user.Password != password {
 		return "", "", errors.New("invalid credentials")
