@@ -4,7 +4,7 @@ interface User {
 	id: number;
 	email: string;
 	password: string;
-	role?: "admin" | "user";
+	role?: "cs" | "operation" | "admin";
 }
 
 export const useAuthStore = defineStore("auth", {
