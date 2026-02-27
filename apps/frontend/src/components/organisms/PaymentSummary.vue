@@ -3,18 +3,17 @@ import { computed } from "vue";
 import { IPayment } from "../../types/payment";
 
 const props = defineProps<{
-	payments: IPayment[];
+	summary: {
+		failed: number;
+		success: number;
+		total: number;
+	};
 }>();
 
-const total = computed(() => props.payments.length);
+const total = computed(() => props.summary.total);
 
-const success = computed(
-	() => props.payments.filter((p) => p.status === "SUCCESS").length,
-);
-
-const failed = computed(
-	() => props.payments.filter((p) => p.status === "FAILED").length,
-);
+const success = computed(() => props.summary.success);
+const failed = computed(() => props.summary.failed);
 </script>
 
 <template>

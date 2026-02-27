@@ -2,14 +2,24 @@
 import { ref, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import type { TableColumnsType } from "ant-design-vue";
+import dayjs from "dayjs";
 
 import PaymentSummary from "../../components/organisms/PaymentSummary.vue";
 import AppHeader from "../../components/organisms/AppHeader.vue";
 
 // type
-import { IPayment } from "../../types/payment";
+import { IPayment, IResponsePayments, ISummary } from "../../types/payment";
+
+// helpers
+import { api } from "../../helpers/api";
 
 const payments = ref<IPayment[]>([]);
+const summary = ref<ISummary>({
+	failed: 0,
+	success: 0,
+	total: 0,
+});
+
 const loading = ref(false);
 
 const columns: TableColumnsType<IPayment> = [
@@ -20,8 +30,8 @@ const columns: TableColumnsType<IPayment> = [
 	},
 	{
 		title: "Merchant Name",
-		dataIndex: "merchantName",
-		key: "merchantName",
+		dataIndex: "merchant_name",
+		key: "merchant_name",
 	},
 	{
 		title: "Date",
@@ -41,37 +51,15 @@ const columns: TableColumnsType<IPayment> = [
 	},
 ];
 
-// 🔥 Simulasi API call
 async function fetchPayments() {
 	try {
 		loading.value = true;
+		const token = (localStorage.getItem("token") as string) || "";
 
-		// ganti dengan API asli nanti
-		await new Promise((r) => setTimeout(r, 800));
+		const response = await api.get<IResponsePayments>("/payments", "v1", token);
 
-		payments.value = [
-			{
-				id: 1,
-				merchantName: "Tokopedia",
-				date: "2026-02-25",
-				amount: 150000,
-				status: "SUCCESS",
-			},
-			{
-				id: 2,
-				merchantName: "Shopee",
-				date: "2026-02-26",
-				amount: 80000,
-				status: "FAILED",
-			},
-			{
-				id: 3,
-				merchantName: "Bukalapak",
-				date: "2026-02-26",
-				amount: 250000,
-				status: "SUCCESS",
-			},
-		];
+		payments.value = response.payments;
+		summary.value = response.summary;
 	} catch (err) {
 		message.error("Failed to fetch payments");
 	} finally {
@@ -89,7 +77,7 @@ onMounted(fetchPayments);
 			<h1 style="margin-bottom: 20px; color: #00949e">Dashboard</h1>
 
 			<!-- Summary -->
-			<PaymentSummary :payments="payments" />
+			<PaymentSummary :summary="summary" />
 
 			<!-- Table -->
 			<a-table
@@ -100,8 +88,11 @@ onMounted(fetchPayments);
 				bordered
 			>
 				<template #bodyCell="{ column, text }">
+					<span v-if="column.dataIndex === 'date'">
+						{{ dayjs(text).format("DD MMM YYYY, HH:mm") }}
+					</span>
 					<span v-if="column.dataIndex === 'status'">
-						<a-tag :color="text === 'SUCCESS' ? 'green' : 'red'">{{
+						<a-tag :color="text === 'success' ? 'green' : 'red'">{{
 							text
 						}}</a-tag>
 					</span>

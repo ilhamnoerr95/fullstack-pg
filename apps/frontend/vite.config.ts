@@ -4,6 +4,15 @@ import path from "path";
 // https://vite.dev/config/
 export default defineConfig({
 	plugins: [vue()],
+	server: {
+		proxy: {
+			"/dashboard/v1": {
+				target: "http://localhost:8080",
+				changeOrigin: true,
+				secure: false,
+			},
+		},
+	},
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "src"),

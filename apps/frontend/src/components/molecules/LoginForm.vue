@@ -7,6 +7,9 @@ import { message } from "ant-design-vue";
 import BaseInput from "../atom/BaseInput.vue";
 import GlassCard from "../atom/GlassCard.vue";
 
+// helpers
+import { api } from "../../helpers/api";
+
 const auth = useAuthStore();
 const router = useRouter();
 
@@ -20,20 +23,26 @@ const submit = async () => {
 	loading.value = true;
 
 	try {
+		if (!email.value || !password.value) {
+			throw new Error("Email dan password wajib diisi");
+		}
+
+		const response = await api.post<{ role: string; token: string }>(
+			"/auth/login",
+			"v1",
+			{
+				email: email.value,
+				password: password.value,
+			},
+		);
+
 		const data = {
 			id: Date.now(),
 			email: email.value,
 			password: password.value,
 		};
 
-		// fake API delay
-		await new Promise((r) => setTimeout(r, 800));
-
-		if (!email.value || !password.value) {
-			throw new Error("Email dan password wajib diisi");
-		}
-
-		auth.login("fake-token", data);
+		auth.login(response.token, data);
 		message.success("Logged in successfully");
 		router.push("/dashboard");
 	} catch (e: any) {
@@ -53,6 +62,7 @@ const submit = async () => {
 				v-model="email"
 				label="Email"
 				placeholder="you@email.com"
+				type="email"
 			/>
 
 			<BaseInput
