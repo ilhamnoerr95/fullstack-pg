@@ -61,6 +61,31 @@ Pastikan sudah terinstall:
 3. Go ≥ 1.22
 4. Docker
 5. Docker Compose
+6. tambahkan .env
+
+## BACKEND .ENV
+
+```.env
+REDIS_ADDR=localhost:6379
+```
+
+## User login
+
+```json
+{
+				ID:       "1",
+				Email:    "operator@mail.com",
+				Password: "123456",
+				Role:     "operator",
+			},
+			{
+				ID:       "2",
+				Email:    "cs@mail.com",
+				Password: "123456",
+				Role:     "cs",
+			},
+}
+```
 
 ## 🛠️ Installation
 
